@@ -1,121 +1,84 @@
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/your_username/rag-semantic-search">
-    <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/python/python.png" alt="Logo" width="80" height="80">
-  </a>
+# RAG Semantic Search
 
-  <h3 align="center">RAG Semantic Search</h3>
+Ask questions about your own PDFs and get concise answers with traceable sources.
 
-  <p align="center">
-    Ask questions about your own PDFs and get concise, grounded answers with traceable sources.
-    <br />
-    <a href="#usage"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="#usage">View Demo</a>
-    ·
-    <a href="https://github.com/your_username/rag-semantic-search/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/your_username/rag-semantic-search/issues">Request Feature</a>
-  </p>
-</div>
+**Highlights**
+- Hybrid retrieval: dense embeddings + local BM25, fused with Reciprocal Rank Fusion.
+- Query expansion (singular/plural + ES/CA term variants) and fuzzy matching for typo tolerance.
+- Coverage-aware reranking and numeric boost for quantity questions.
+- Strict RAG prompting: answers are grounded in retrieved context only, with source refs.
+- Multiple interfaces: FastAPI API, lightweight Web UI, and optional Streamlit app.
+- End-to-end ingestion pipeline from PDFs to Pinecone.
 
-<!-- BADGES -->
-<p align="center">
-  <img alt="Python Version" src="https://img.shields.io/badge/python-3.10%2B-blue.svg">
-  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.111.0%2B-009688.svg?logo=fastapi">
-  <img alt="LangChain" src="https://img.shields.io/badge/LangChain-0.2.0%2B-blue.svg">
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg">
-</p>
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#ℹ️-about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#🌟-highlights">Highlights</a></li>
-        <li><a href="#🛠️-built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#🏁-getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#🏗️-architecture">Architecture</a></li>
-    <li><a href="#🚀-usage">Usage</a></li>
-    <li><a href="#🗺️-roadmap">Roadmap</a></li>
-    <li><a href="#🤝-contributing">Contributing</a></li>
-    <li><a href="#📝-license">License</a></li>
-    <li><a href="#📫-contact">Contact</a></li>
-  </ol>
-</details>
+**Table of Contents**
+- Overview
+- What I Built and Why
+- What It Enables
+- Architecture
+- Requirements
+- Quickstart
+- Configuration
+- Ingestion Pipeline
+- API
+- Web UI
+- Streamlit
+- Docker
+- Project Structure
+- Tests
 
 ## ℹ️ About The Project
 
 This project implements a highly robust **Retrieval-Augmented Generation (RAG)** search system for PDF documents. It transforms how you interact with your personal or corporate document sets by combining advanced vector search with local lexical indexing.
 
-I built this project to reliably answer real, natural-language questions from real PDFs without losing trust in the results. By employing strict RAG prompting, the LLM generates answers exclusively based on retrieved context, ensuring that every output is grounded and auditable with precise source citations.
-
 Whether you are performing deep research, analyzing financial reports, or studying textbooks, this tool provides precise, typo-tolerant, and context-aware answers.
 
+### 🎯 What I Built and Why
+
+I built this project to answer real questions from real PDFs without losing trust in the results. By employing strict RAG prompting, the LLM generates answers exclusively based on retrieved context, ensuring that every output is grounded and auditable with precise source citations.
+
+Here is what I chose to build and why:
+- **PDF Ingestion Pipeline**: Cleans text, chunks it, and builds embeddings so documents are fully searchable and the process is repeatable.
+- **Pinecone Vector Database**: Chosen for vector indexing so semantic search stays fast even as the document set grows.
+- **Local BM25 Index**: Added because exact keyword matches still matter and dense embeddings alone can miss them.
+- **Reciprocal Rank Fusion**: Blends dense and lexical results so one signal never overwhelms the other.
+- **Query Expansion & Fuzzy Matching**: Handles singular/plural forms, ES/CA terminology variants, and small typos gracefully.
+- **Coverage-Aware Reranking**: Re-ranks by query coverage and numeric signals so the top chunks are the ones most likely to contain the answer, especially for quantity questions.
+- **Strict RAG Prompting**: Uses only retrieved context and cites precise sources so answers are grounded and auditable.
+- **Multiple Interfaces**: Exposed the system through FastAPI, a simple Web UI, and an optional Streamlit app so developers and non-technical users can work with it effortlessly.
+
 ### 🌟 Highlights
+- Hybrid retrieval: dense embeddings + local BM25, fused with Reciprocal Rank Fusion.
+- Query expansion (singular/plural + ES/CA term variants) and fuzzy matching for typo tolerance.
+- Coverage-aware reranking and numeric boost for quantity questions.
+- Strict RAG prompting: answers are grounded in retrieved context only, with source refs.
+- Multiple interfaces: FastAPI API, lightweight Web UI, and optional Streamlit app.
+- End-to-end ingestion pipeline from PDFs to Pinecone.
 
-Here's why this RAG pipeline stands out:
+**What It Enables**
+- Ask natural-language questions over your PDFs and receive cited answers.
+- Upload new PDFs and re-ingest without rewriting code.
+- Swap LLM providers between OpenAI and Ollama with a single env change.
+- Tune retrieval depth, chunking strategy, and context size for your domain.
 
-*   **Hybrid Retrieval:** Merges dense embeddings (`Pinecone`) with local `BM25`, fused seamlessly using Reciprocal Rank Fusion.
-*   **Intelligent Query Expansion & Fuzzy Matching:** Automatically handles singular/plural forms, ES/CA term variants, and gracefully catches small typos.
-*   **Coverage-Aware Reranking:** Includes custom numeric boosting to vastly improve the accuracy of quantity and math-related queries.
-*   **Strict Source Grounding:** LLM generation uses *only* retrieved context with fully traceable source references.
-*   **Flexible Access:** Interact via a blazing-fast FastAPI backend, a sleek Web UI, or an optional interactive Streamlit application.
-*   **End-to-End Ingestion:** Fully automated pipeline taking raw PDFs through text extraction, semantic chunking, embedding generation, and Pinecone ingestion.
-*   **LLM Agnostic:** Switch effortlessly between your local Ollama instance and the OpenAI API with a simple environment variable toggle.
+**Architecture**
+- Ingestion: `PDF -> clean text -> chunks -> embeddings -> Pinecone`.
+- Retrieval: hybrid dense + lexical (BM25), merged with Reciprocal Rank Fusion.
+- Rerank: query coverage boost + numeric boost for quantity questions.
+- Generation: LLM (`openai` or `ollama`) using retrieved context only.
+- Interfaces: FastAPI (`/ask`, `/upload`, `/documents`, `/ingest`, `/health`), Web UI served at `/`, optional Streamlit frontend.
 
-### 🛠️ Built With
+**Requirements**
+- Python 3.10+
+- A Pinecone account and API key
+- One LLM provider: OpenAI API key or local Ollama instance
 
-This project relies on modern, industry-standard tools for AI, backend engineering, and retrieval.
-
-*   [![Python][Python-shield]][Python-url]
-*   [![FastAPI][FastAPI-shield]][FastAPI-url]
-*   [![LangChain][LangChain-shield]][LangChain-url]
-*   [![Pinecone][Pinecone-shield]][Pinecone-url]
-*   [![Streamlit][Streamlit-shield]][Streamlit-url]
-*   [![Docker][Docker-shield]][Docker-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## 🏁 Getting Started
-
-To get a local copy up and running, follow these simple steps.
-
-### Prerequisites
-
-*   Python 3.10+
-*   A [Pinecone](https://www.pinecone.io/) account and API key
-*   Either an **OpenAI API Key** or a local **Ollama** instance
-
-### Installation
-
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/your_username/rag-semantic-search.git
-   cd rag-semantic-search
-   ```
-
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv .venv
-
-   # Windows
-   .venv\Scripts\activate
-   # Linux/macOS
-   source .venv/bin/activate
-   ```
+**Quickstart**
+```bash
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
 
 3. Install required packages:
    ```sh
