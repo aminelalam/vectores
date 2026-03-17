@@ -1,19 +1,13 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/aminelalam/rag-semantic-search">
-  </a>
+  <h1>🔍 Ask Questions About Your PDFs</h1>
+  <h3>RAG Semantic Search</h3>
 
-  <h3 align="center">RAG Semantic Search</h3>
-
-  <p align="center">
+  <p>
     Ask questions about your own PDFs and get concise, grounded answers with traceable sources.
-    <br />
-    <br />
-    <br />
   </p>
 </div>
-
 <!-- BADGES -->
 <p align="center">
   <img alt="Python Version" src="https://img.shields.io/badge/python-3.10%2B-blue.svg">
