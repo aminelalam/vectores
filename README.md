@@ -9,7 +9,6 @@
   <p align="center">
     Ask questions about your own PDFs and get concise, grounded answers with traceable sources.
     <br />
-    <a href="#usage"><strong>Explore the docs »</strong></a>
     <br />
     <br />
   </p>
