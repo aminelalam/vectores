@@ -1,8 +1,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/your_username/rag-semantic-search">
-    <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/python/python.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/aminelalam/rag-semantic-search">
   </a>
 
   <h3 align="center">RAG Semantic Search</h3>
