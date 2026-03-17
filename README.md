@@ -7,7 +7,7 @@ Ask questions about your own PDFs and get concise answers with traceable sources
 - Query expansion (singular/plural + ES/CA term variants) and fuzzy matching for typo tolerance.
 - Coverage-aware reranking and numeric boost for quantity questions.
 - Strict RAG prompting: answers are grounded in retrieved context only, with source refs.
-- Multiple interfaces: FastAPI API, lightweight Web UI, and optional Streamlit app.
+- Multiple interfaces: FastAPI API and lightweight Web UI.
 - End-to-end ingestion pipeline from PDFs to Pinecone.
 
 **Table of Contents**
