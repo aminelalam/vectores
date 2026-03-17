@@ -1,0 +1,653 @@
+﻿<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Buscador semántico RAG</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+      :root {
+        --bg: #ffffff;
+        --fg: #000000;
+        --muted: #f5f5f5;
+        --muted-fg: #4a4a4a;
+        --border: #000000;
+        --border-light: #d9d9d9;
+      }
+
+      * { box-sizing: border-box; }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background:
+          repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 3px),
+          #fefefe;
+        color: var(--fg);
+        font-family: "Source Serif 4", Georgia, serif;
+      }
+
+      .shell {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 28px 48px;
+        display: grid;
+        gap: 32px;
+      }
+
+      .header {
+        border-bottom: 8px solid var(--fg);
+        padding-bottom: 24px;
+      }
+
+      .title {
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: clamp(42px, 6vw, 88px);
+        letter-spacing: -0.04em;
+        line-height: 0.95;
+        margin: 0;
+      }
+
+      .subtitle {
+        max-width: 720px;
+        margin: 14px 0 0;
+        color: var(--muted-fg);
+        font-size: 18px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 24px;
+      }
+
+      .panel {
+        border: 2px solid var(--fg);
+        padding: 18px;
+        background: #fff;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .divider {border-top: 4px solid var(--fg); margin: 12px 0 24px;}
+
+      /* Buttons */
+      button {
+        border: 2px solid var(--fg);
+        background: var(--fg);
+        color: var(--bg);
+        padding: 12px 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+        transition: none;
+        border-radius: 0;
+      }
+
+      button:hover:not(:disabled) {
+        background: var(--bg);
+        color: var(--fg);
+      }
+
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      button:focus-visible {
+        outline: 3px solid var(--fg);
+        outline-offset: 3px;
+      }
+
+      .ghost { background: transparent; color: var(--fg); border-color: var(--fg); }
+      .ghost:hover { background: var(--fg); color: var(--bg); }
+
+      /* Inputs */
+      input[type="text"], textarea, input[type="range"] { border-radius: 0; }
+
+      textarea,
+      input[type="text"] {
+        width: 100%;
+        border: 0;
+        border-bottom: 2px solid var(--fg);
+        padding: 10px 6px;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: inherit;
+      }
+
+      textarea:focus,
+      input[type="text"]:focus {
+        outline: none;
+        border-bottom: 4px solid var(--fg);
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 56px;
+      }
+
+      input[type="range"] {
+        accent-color: var(--fg);
+        width: 150px;
+      }
+
+      /* Upload */
+      .upload-box {
+        position: relative;
+        border: 2px dashed var(--fg);
+        padding: 32px;
+        text-align: center;
+        font-size: 15px;
+        background: var(--muted);
+        border-radius: 0;
+        cursor: pointer;
+        min-height: 170px;
+        display: grid;
+        place-items: center;
+      }
+      .upload-box input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .doc-list {
+        border: 1px solid var(--fg);
+        background: var(--muted);
+        max-height: 240px;
+        overflow: auto;
+      }
+
+      .doc-item {
+        border-bottom: 1px solid var(--border-light);
+        padding: 10px 12px;
+      }
+
+      .doc-item:last-child {
+        border-bottom: 0;
+      }
+
+      /* Alert */
+      .alert {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        border: 2px solid var(--fg);
+        padding: 12px 14px;
+        background: #f7f7f7;
+        border-radius: 0;
+      }
+      .status-icon {
+        display: inline-grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--fg);
+        background: var(--bg);
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      .alert-title {
+        margin: 0;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .alert-sub {
+        margin: 4px 0 0;
+        color: var(--muted-fg);
+      }
+
+      /* Ingest */
+      .ingest { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; }
+
+      .progress-shell { height: 10px; border: 1px solid var(--border); background: var(--muted); border-radius: 999px; overflow: hidden; }
+
+      .progress-fill {
+        height: 100%;
+        width: 6%;
+        background: var(--fg);
+        transition: width 0.2s linear;
+      }
+
+      .progress-fill.running {
+        animation: run 1.4s linear infinite;
+      }
+
+      @keyframes run {
+        from {
+          transform: translateX(-40%);
+        }
+        to {
+          transform: translateX(200%);
+        }
+      }
+
+      /* Logs */
+      .log-output { border: 1px solid var(--border); background: var(--bg); padding: 10px; font-family: "JetBrains Mono", monospace; font-size: 13px; min-height: 0; max-height: 220px; overflow: auto; white-space: pre-wrap; border-radius: 8px; }
+
+      .log-status-line {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+      }
+
+      /* Chat */
+      .chat { display: grid; grid-template-rows: 1fr auto; gap: 12px; min-height: 0; }
+
+      .messages { display: flex; flex-direction: column; gap: 12px; overflow: auto; max-height: 420px; padding-right: 4px; }
+
+      .message { border: 1px solid var(--border); padding: 12px; position: relative; max-width: 90%; border-radius: 10px; }
+
+      .message.assistant { background: var(--fg); color: var(--bg); align-self: flex-start; }
+      .message.user { background: var(--bg); color: var(--fg); align-self: flex-end; }
+
+      .message .role { position: absolute; left: 10px; top: 12px; width: 6px; height: 16px; background: var(--fg); border-radius: 2px; }
+      .message.assistant .role { background: var(--bg); }
+
+      .source-list {
+        margin: 10px 0 0;
+        padding-left: 16px;
+        font-size: 13px;
+      }
+
+      .composer {
+        border-top: 2px solid var(--fg);
+        padding-top: 10px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .topk {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .tabla-fuentes {
+        margin-top: 10px;
+        border: 2px solid var(--fg);
+      }
+
+      .tabla-fuentes .tabla-titulo {
+        background: var(--fg);
+        color: var(--bg);
+        padding: 8px 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+      }
+
+      .tabla-fuentes table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .tabla-fuentes th,
+      .tabla-fuentes td {
+        border: 1px solid var(--fg);
+        padding: 8px 10px;
+        text-align: left;
+      }
+
+      .tabla-fuentes tr:hover {
+        background: var(--fg);
+        color: var(--bg);
+      }
+
+      /* Responsivo */
+      @media (max-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .messages {
+          max-height: none;
+        }
+
+        .title {
+          font-size: clamp(36px, 10vw, 64px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="header">
+        <h1 class="title">Buscador semántico RAG</h1>
+        <p class="subtitle">Pregunta a tus PDFs y obtén respuestas citadas.</p>
+      </header>
+
+      <div class="grid">
+        <aside class="panel" aria-label="Documentos">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+            <h2 style="margin:0; font-size:22px; font-weight:700;">Documentos</h2>
+            <button id="refreshDocsBtn" class="ghost" style="padding:6px 10px; text-transform:none; letter-spacing:0;">&#8635;</button>
+          </div>
+          <div class="divider"></div>
+          <label class="upload-box" for="pdfInput">
+            <div style="font-size:32px; line-height:1;">&#8679;</div>
+            <div style="margin-top:8px;">Arrastra o haz clic para subir PDFs</div>
+            <input id="pdfInput" type="file" accept=".pdf" multiple />
+          </label>
+          <div style="display:grid; gap:10px; margin-top:12px;">
+            <button id="uploadBtn">Subir archivos</button>
+            <div id="uploadStatus" class="status-text"></div>
+          </div>
+          <div class="divider"></div>
+          <div id="documentsList" class="doc-list"></div>
+        </aside>
+
+        <main class="panel" aria-label="Panel principal">
+          <section class="alert" id="healthAlert">
+            <div class="alert-sub" id="healthSubtitle">Ãndice activo: pendiente</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span id="healthIcon" class="status-icon">✓</span>
+              <button id="refreshHealthBtn" type="button" class="ghost" style="padding:8px 12px; text-transform:none; letter-spacing:0;">Reintentar</button>
+            </div>
+          </section>
+
+          <div class="divider"></div>
+
+          <section class="ingest">
+            <div>
+              <p style="margin:0 0 8px; text-transform:uppercase; letter-spacing:0.08em; font-size:13px;">Ingestion Pipeline</p>
+              <div class="progress-shell"><div id="progressFill" class="progress-fill"></div></div>
+              <div id="ingestStatus" class="log-status-line" style="margin-top:6px;">Esperando ingestión</div>
+            </div>
+            <button id="ingestBtn">Ejecutar</button>
+          </section>
+
+          <div class="divider"></div>
+
+          <section>
+            <details id="logsDetails">
+              <summary style="cursor:pointer; font-weight:600; display:flex; align-items:center; gap:8px;">
+                <span>Registros</span>
+                <span class="log-status-line" id="logStatusHint"></span>
+              </summary>
+              <div id="ingestLogs" class="log-output" aria-live="polite">Sin logs todavía.</div>
+            </details>
+          </section>
+
+          <div class="divider"></div>
+
+          <section class="chat" aria-label="Chat">
+            <div id="chatFeed" class="messages"></div>
+            <div class="composer">
+              <div class="topk">
+                <label for="topKSlider">Top K</label>
+                <input id="topKSlider" type="range" min="1" max="20" value="8" />
+                <span id="topKValue">8</span>
+              </div>
+              <form id="askForm" style="display:grid; grid-template-columns:1fr auto; gap:10px;">
+                <textarea id="queryInput" placeholder="Sube tus documentos para comenzar a interactuar." required></textarea>
+                <button id="sendBtn" type="submit">Enviar</button>
+              </form>
+              <div id="askStatus" class="status-text"></div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const ui = {
+        pdfInput: document.getElementById("pdfInput"),
+        uploadBtn: document.getElementById("uploadBtn"),
+        refreshDocsBtn: document.getElementById("refreshDocsBtn"),
+        uploadStatus: document.getElementById("uploadStatus"),
+        documentsList: document.getElementById("documentsList"),
+        healthAlert: document.getElementById("healthAlert"),
+        healthSubtitle: document.getElementById("healthSubtitle"),
+        refreshHealthBtn: document.getElementById("refreshHealthBtn"),
+        ingestBtn: document.getElementById("ingestBtn"),
+        progressFill: document.getElementById("progressFill"),
+        ingestStatus: document.getElementById("ingestStatus"),
+        ingestLogs: document.getElementById("ingestLogs"),
+        chatFeed: document.getElementById("chatFeed"),
+        topKSlider: document.getElementById("topKSlider"),
+        topKValue: document.getElementById("topKValue"),
+        askForm: document.getElementById("askForm"),
+        queryInput: document.getElementById("queryInput"),
+        sendBtn: document.getElementById("sendBtn"),
+        askStatus: document.getElementById("askStatus"),
+      };
+
+      const state = { busyChat: false, busyIngest: false };
+
+      function setStatus(element, text, isError = false) {
+        element.textContent = text || "";
+        element.style.color = isError ? "#dc2626" : "var(--muted-fg)";
+      }
+
+      async function fetchJson(url, options = {}) {
+        const response = await fetch(url, options);
+        const raw = await response.text();
+        let payload = {};
+        try {
+          payload = raw ? JSON.parse(raw) : {};
+        } catch {
+          payload = { detail: raw };
+        }
+        if (!response.ok) {
+          throw new Error(payload.detail || "Request failed.");
+        }
+        return payload;
+      }
+
+      function setProgress(mode) {
+        if (mode === "idle") {
+          ui.progressFill.style.width = "0%";
+          return;
+        }
+        if (mode === "running") {
+          ui.progressFill.style.width = "25%";
+          return;
+        }
+        if (mode === "done") {
+          ui.progressFill.style.width = "100%";
+          setTimeout(() => ui.progressFill.style.width = "0%", 1200);
+        }
+      }
+
+      function setHealth(ok, subtitle) {
+        document.getElementById("healthIcon").textContent = ok ? "✓" : "!";
+        ui.healthSubtitle.textContent = subtitle || "";
+      }
+
+      function renderDocuments(files) {
+        ui.documentsList.innerHTML = "";
+        if (!files || files.length === 0) {
+          const item = document.createElement("div");
+          item.className = "doc-item";
+          item.textContent = "Sin documentos cargados.";
+          ui.documentsList.appendChild(item);
+          return;
+        }
+        files.forEach((name) => {
+          const item = document.createElement("div");
+          item.className = "doc-item";
+          item.textContent = name;
+          ui.documentsList.appendChild(item);
+        });
+      }
+
+      function tablaFuentesHtml(sources) {
+        if (!sources || sources.length === 0) return "";
+        const rows = sources
+          .map((src, idx) => `<tr><td>Source ${idx + 1}</td><td>${src.source}</td><td>${src.page}</td><td>${Number(src.score).toFixed(3)}</td></tr>`)
+          .join("");
+        return `<div class="tabla-fuentes"><div class="tabla-titulo">Fuentes</div><table><thead><tr><th>Ref</th><th>Archivo</th><th>Página</th><th>Score</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      }
+
+      function appendMessage(role, content, sources = []) {
+        const wrapper = document.createElement("div");
+        wrapper.className = `message ${role}`;
+
+        const bar = document.createElement("div");
+        bar.className = "role";
+        wrapper.appendChild(bar);
+
+        const body = document.createElement("div");
+        body.innerHTML = content;
+        wrapper.appendChild(body);
+
+        if (role === "assistant" && sources.length > 0) {
+          const tabla = document.createElement("div");
+          tabla.innerHTML = tablaFuentesHtml(sources);
+          wrapper.appendChild(tabla);
+        }
+
+        ui.chatFeed.appendChild(wrapper);
+        ui.chatFeed.scrollTop = ui.chatFeed.scrollHeight;
+      }
+
+      function formatIngestionLogs(logBlocks) {
+        if (!Array.isArray(logBlocks) || logBlocks.length === 0) return "Sin logs.";
+        return logBlocks.map((block) => String(block || "").trim()).filter(Boolean).join("\n\n");
+      }
+
+      async function refreshHealth() {
+        try {
+          const data = await fetchJson("/health");
+          if (data.status === "ok") {
+            setHealth(true, `Indice activo: ${data.index || "unknown"}`);
+          } else {
+            setHealth(false, data.details || "Motor no disponible");
+          }
+        } catch (error) {
+          setHealth(false, String(error.message || error));
+        }
+      }
+
+      async function retryEngine() {
+        ui.refreshHealthBtn.disabled = true;
+        try {
+          const data = await fetchJson("/engine/reload", { method: "POST" });
+          if (data.status === "ok") {
+            setHealth(true, `Indice activo: ${data.index || "unknown"}`);
+          } else {
+            setHealth(false, data.details || "Motor no disponible");
+          }
+        } catch (error) {
+          setHealth(false, String(error.message || error));
+        } finally {
+          ui.refreshHealthBtn.disabled = false;
+        }
+      }
+
+      async function refreshDocuments() {
+        try {
+          const data = await fetchJson("/documents");
+          renderDocuments(data.files || []);
+        } catch (error) {
+          renderDocuments([]);
+          setStatus(ui.uploadStatus, String(error.message || error), true);
+        }
+      }
+
+      async function uploadFiles() {
+        const files = ui.pdfInput.files;
+        if (!files || files.length === 0) {
+          setStatus(ui.uploadStatus, "Selecciona al menos un PDF.", true);
+          return;
+        }
+
+        const form = new FormData();
+        Array.from(files).forEach((file) => form.append("files", file));
+
+        ui.uploadBtn.disabled = true;
+
+        try {
+          const data = await fetchJson("/upload", { method: "POST", body: form });
+          setStatus(ui.uploadStatus, data.message || "Archivos subidos.");
+          renderDocuments(data.saved_files || []);
+        } catch (error) {
+          setStatus(ui.uploadStatus, String(error.message || error), true);
+        } finally {
+          ui.uploadBtn.disabled = false;
+        }
+      }
+
+      async function runIngestion() {
+        if (state.busyIngest) return;
+        state.busyIngest = true;
+        ui.ingestBtn.disabled = true;
+        setProgress("running");
+        setStatus(ui.ingestStatus, "Ejecutando ingestión...");
+        try {
+          const data = await fetchJson("/ingest", { method: "POST" });
+          setStatus(ui.ingestStatus, data.message || "Completado.");
+          setProgress("done");
+          ui.ingestLogs.textContent = formatIngestionLogs(data.logs || []);
+          await refreshHealth();
+        } catch (error) {
+          setStatus(ui.ingestStatus, String(error.message || error), true);
+          setProgress("idle");
+        } finally {
+          state.busyIngest = false;
+          ui.ingestBtn.disabled = false;
+          setTimeout(() => setProgress("idle"), 1600);
+        }
+      }
+
+      async function askQuestion(event) {
+        event.preventDefault();
+        if (state.busyChat) return;
+        const query = ui.queryInput.value.trim();
+        if (!query) return;
+
+        state.busyChat = true;
+        ui.sendBtn.disabled = true;
+        setStatus(ui.askStatus, "Consultando...");
+
+        appendMessage("user", query, []);
+
+        try {
+          const payload = await fetchJson("/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query, top_k: Number(ui.topKSlider.value) || 5 }),
+          });
+          appendMessage("assistant", payload.answer || "Sin respuesta.", payload.sources || []);
+          setStatus(ui.askStatus, "");
+        } catch (error) {
+          appendMessage("assistant", `Error: ${error.message || error}`);
+          setStatus(ui.askStatus, String(error.message || error), true);
+        } finally {
+          state.busyChat = false;
+          ui.sendBtn.disabled = false;
+          ui.queryInput.value = "";
+        }
+      }
+
+      function init() {
+        ui.refreshHealthBtn.addEventListener("click", retryEngine);
+        ui.refreshDocsBtn.addEventListener("click", refreshDocuments);
+        ui.uploadBtn.addEventListener("click", uploadFiles);
+        ui.ingestBtn.addEventListener("click", runIngestion);
+        ui.askForm.addEventListener("submit", askQuestion);
+        ui.topKSlider.addEventListener("input", () => {
+          ui.topKValue.textContent = ui.topKSlider.value;
+        });
+        refreshHealth();
+        refreshDocuments();
+      }
+
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
+
+

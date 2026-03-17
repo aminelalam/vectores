@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.pytest_cache/
+
+# Virtual envs
+.venv/
+venv/
+
+# Local temp folders seen in this workspace
+pytest-cache-files-*/
+
+# Data pipeline outputs
+data/processed/*.txt
+data/processed/*.jsonl
+data/chunks/*.jsonl

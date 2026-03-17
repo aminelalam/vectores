@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: rag-api
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: rag-frontend
+    env_file:
+      - .env
+    environment:
+      API_URL: http://api:8000/ask
+    depends_on:
+      - api
+    ports:
+      - "8501:8501"
