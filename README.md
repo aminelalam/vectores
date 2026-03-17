@@ -2,7 +2,6 @@
 <br />
 <div align="center">
   <h1>🔍 Ask Questions About Your PDFs</h1>
-  <h3>RAG Semantic Search</h3>
   
 </div>
 <!-- BADGES -->
