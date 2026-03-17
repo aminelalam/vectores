@@ -183,8 +183,6 @@ The integrated Web UI (available dynamically on `/`) provisions an intuitive das
 
 Amin El Alam Tizniti -  - amin.elalamtizniti1@gmail.com
 
-LINKDIN: [AMIN EL ALAM](www.linkedin.com/in/amin-el-alam-tizniti-2b97052a4)
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
