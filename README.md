@@ -13,11 +13,6 @@
     <a href="#usage"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="#usage">View Demo</a>
-    ·
-    <a href="https://github.com/your_username/rag-semantic-search/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/your_username/rag-semantic-search/issues">Request Feature</a>
   </p>
 </div>
 
