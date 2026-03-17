@@ -3,6 +3,14 @@
 <div align="center">
   <h1>🔍 Ask Questions About Your PDFs</h1>
   <h3>RAG Semantic Search</h3>
+  
+</div>
+<!-- BADGES -->
+<p align="center">
+  <img alt="Python Version" src="https://img.shields.io/badge/python-3.10%2B-blue.svg">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.111.0%2B-009688.svg?logo=fastapi">
+  <img alt="LangChain" src="https://img.shields.io/badge/LangChain-0.2.0%2B-blue.svg">
+</p>
 
 
 <!-- TABLE OF CONTENTS -->
