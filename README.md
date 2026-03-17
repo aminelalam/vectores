@@ -133,7 +133,7 @@ docker compose up --build
 ```
 Once deployed, access the services here:
 *   **API & Web UI:** `http://localhost:8000/`
-*   **Streamlit App:** `http://localhost:8501/`
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
